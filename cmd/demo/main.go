@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	nativ "nativ"
-	"nativ/widget"
+	nativ "github.com/CephandriusMaxtori/Nativ"
+	"github.com/CephandriusMaxtori/Nativ/widget"
 )
 
 func main() {

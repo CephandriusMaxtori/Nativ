@@ -1,6 +1,6 @@
 package nativ
 
-import "nativ/internal/renderer"
+import "github.com/CephandriusMaxtori/Nativ/internal/renderer"
 
 var initialized bool
 

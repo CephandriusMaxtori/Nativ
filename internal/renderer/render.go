@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"nativ/internal/platform"
+	"github.com/CephandriusMaxtori/Nativ/internal/platform"
 )
 
 type DrawCommand struct {

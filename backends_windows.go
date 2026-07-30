@@ -2,4 +2,4 @@
 
 package nativ
 
-import _ "nativ/internal/renderer/opengl"
+import _ "github.com/CephandriusMaxtori/Nativ/internal/renderer/opengl"

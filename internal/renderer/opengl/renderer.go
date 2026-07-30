@@ -7,8 +7,8 @@ import (
 	"math"
 	"unsafe"
 
-	"nativ/internal/platform"
-	"nativ/internal/renderer"
+	"github.com/CephandriusMaxtori/Nativ/internal/platform"
+	"github.com/CephandriusMaxtori/Nativ/internal/renderer"
 )
 
 func init() {

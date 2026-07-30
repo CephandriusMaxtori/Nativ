@@ -3,8 +3,8 @@ package widget
 import (
 	"testing"
 
-	"nativ/internal/event"
-	"nativ/internal/renderer"
+	"github.com/CephandriusMaxtori/Nativ/internal/event"
+	"github.com/CephandriusMaxtori/Nativ/internal/renderer"
 )
 
 func TestNewVBoxLayout(t *testing.T) {

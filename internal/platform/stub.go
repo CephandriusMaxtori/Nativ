@@ -5,7 +5,7 @@ package platform
 import (
 	"errors"
 
-	"nativ/internal/event"
+	"github.com/CephandriusMaxtori/Nativ/internal/event"
 )
 
 var ErrUnsupported = errors.New("nativ: windows is the only supported platform in v0.1")

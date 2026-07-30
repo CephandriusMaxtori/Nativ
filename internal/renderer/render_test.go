@@ -3,7 +3,7 @@ package renderer
 import (
 	"testing"
 
-	"nativ/internal/platform"
+	"github.com/CephandriusMaxtori/Nativ/internal/platform"
 )
 
 func TestRegisterAndList(t *testing.T) {

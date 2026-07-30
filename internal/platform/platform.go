@@ -1,6 +1,6 @@
 package platform
 
-import "nativ/internal/event"
+import "github.com/CephandriusMaxtori/Nativ/internal/event"
 
 type Platform interface {
 	CreateWindow(title string, width, height int) (hwnd, hdc uintptr, err error)

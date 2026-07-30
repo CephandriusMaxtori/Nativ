@@ -7,7 +7,7 @@ import (
 	"syscall"
 	"unsafe"
 
-	"nativ/internal/event"
+	"github.com/CephandriusMaxtori/Nativ/internal/event"
 	"golang.org/x/sys/windows"
 )
 

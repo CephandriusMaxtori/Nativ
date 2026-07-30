@@ -1,8 +1,8 @@
 package widget
 
 import (
-	"nativ/internal/event"
-	"nativ/internal/renderer"
+	"github.com/CephandriusMaxtori/Nativ/internal/event"
+	"github.com/CephandriusMaxtori/Nativ/internal/renderer"
 )
 
 type Widget interface {

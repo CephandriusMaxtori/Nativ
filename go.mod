@@ -1,4 +1,4 @@
-module nativ
+module github.com/CephandriusMaxtori/Nativ
 
 go 1.25.0
 

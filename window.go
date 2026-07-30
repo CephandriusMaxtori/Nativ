@@ -3,10 +3,10 @@ package nativ
 import (
 	"fmt"
 
-	"nativ/internal/event"
-	"nativ/internal/platform"
-	"nativ/internal/renderer"
-	"nativ/widget"
+	"github.com/CephandriusMaxtori/Nativ/internal/event"
+	"github.com/CephandriusMaxtori/Nativ/internal/platform"
+	"github.com/CephandriusMaxtori/Nativ/internal/renderer"
+	"github.com/CephandriusMaxtori/Nativ/widget"
 )
 
 type Window struct {
