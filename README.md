@@ -1,5 +1,7 @@
 # Nativ
 
+![WIP](https://img.shields.io/badge/status-WIP-yellow)
+
 **Pure Go GUI library — zero Cgo dependencies.**
 
 Nativ provides a hardware-accelerated GUI toolkit for Go on Windows, with a cross-platform architecture designed for Linux/macOS. It targets OpenGL 3.3+ without requiring any external C libraries, GPU SDKs, or framework bindings.
