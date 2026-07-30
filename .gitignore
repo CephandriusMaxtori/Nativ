@@ -1,0 +1,17 @@
+*.exe
+*.test
+*.out
+*.exe~
+*.dll
+*.so
+*.dylib
+*.obj
+*.lib
+*.exp
+*.ilk
+*.pdb
+*.manifest
+*.log
+*.tmp
+/tmp/
+vendor/
