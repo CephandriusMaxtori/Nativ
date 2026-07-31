@@ -32,7 +32,7 @@ type vulkanRenderer struct {
 	initialized    bool
 }
 
-func (r *vulkanRenderer) Init(plat platform.Platform) error {
+func (r *vulkanRenderer) Init(plat platform.Platform, width, height int) error {
 	var err error
 
 	r.instance, err = createInstance()

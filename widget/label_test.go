@@ -21,13 +21,16 @@ func TestLabelDraw(t *testing.T) {
 	cmds := make([]renderer.DrawCommand, 0, 10)
 	l.Draw(&cmds)
 
-	if len(cmds) != 1 {
-		t.Fatalf("expected 1 command, got %d", len(cmds))
+	if len(cmds) != 2 {
+		t.Fatalf("expected 2 commands (background + text), got %d", len(cmds))
 	}
 
 	c := cmds[0]
 	if c.X != 10 || c.Y != 20 || c.Width != 200 || c.Height != 30 {
 		t.Fatalf("unexpected bounds: %v %v %v %v", c.X, c.Y, c.Width, c.Height)
+	}
+	if cmds[1].Text != "hello" {
+		t.Fatalf("expected text command, got %+v", cmds[1])
 	}
 }
 

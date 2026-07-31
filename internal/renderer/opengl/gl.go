@@ -36,6 +36,20 @@ const (
 	GL_COMPILE_STATUS          = 0x8B81
 	GL_LINK_STATUS             = 0x8B82
 	GL_INFO_LOG_LENGTH         = 0x8B84
+	GL_TEXTURE_2D              = 0x0DE1
+	GL_TEXTURE_WRAP_S          = 0x2802
+	GL_TEXTURE_WRAP_T          = 0x2803
+	GL_TEXTURE_MIN_FILTER      = 0x2801
+	GL_TEXTURE_MAG_FILTER      = 0x2800
+	GL_NEAREST                 = 0x2600
+	GL_LINEAR                  = 0x2601
+	GL_CLAMP_TO_EDGE           = 0x812F
+	GL_RGBA                    = 0x1908
+	GL_UNSIGNED_BYTE           = 0x1401
+	GL_TEXTURE0                = 0x84C0
+	GL_ALPHA                   = 0x1906
+	GL_RED                     = 0x1903
+	GL_UNPACK_ALIGNMENT        = 0x0CF5
 )
 
 type glProcs struct {
@@ -71,8 +85,16 @@ type glProcs struct {
 	drawArrays            uintptr
 	getError              uintptr
 	getUniformLocation    uintptr
+	uniform1i             uintptr
 	uniform4f             uintptr
 	uniformMatrix4fv      uintptr
+	genTextures           uintptr
+	bindTexture           uintptr
+	texImage2D            uintptr
+	texParameteri         uintptr
+	pixelStorei           uintptr
+	activeTexture         uintptr
+	deleteTextures        uintptr
 }
 
 var gl glProcs
@@ -110,8 +132,16 @@ func loadGLProcs() {
 	gl.drawArrays = getGLProc("glDrawArrays")
 	gl.getError = getGLProc("glGetError")
 	gl.getUniformLocation = getGLProc("glGetUniformLocation")
+	gl.uniform1i = getGLProc("glUniform1i")
 	gl.uniform4f = getGLProc("glUniform4f")
 	gl.uniformMatrix4fv = getGLProc("glUniformMatrix4fv")
+	gl.genTextures = getGLProc("glGenTextures")
+	gl.bindTexture = getGLProc("glBindTexture")
+	gl.texImage2D = getGLProc("glTexImage2D")
+	gl.texParameteri = getGLProc("glTexParameteri")
+	gl.pixelStorei = getGLProc("glPixelStorei")
+	gl.activeTexture = getGLProc("glActiveTexture")
+	gl.deleteTextures = getGLProc("glDeleteTextures")
 }
 
 func getGLProc(name string) uintptr {
@@ -279,4 +309,37 @@ func glUniformMatrix4fv(location int32, count int32, transpose bool, value *floa
 	}
 	syscall.Syscall6(gl.uniformMatrix4fv, 4,
 		uintptr(location), uintptr(count), uintptr(t), uintptr(unsafe.Pointer(value)), 0, 0)
+}
+
+func glUniform1i(location int32, v0 int32) {
+	syscall.Syscall(gl.uniform1i, 2, uintptr(location), uintptr(v0), 0)
+}
+
+func glGenTextures(n int32, textures *uint32) {
+	syscall.Syscall(gl.genTextures, 2, uintptr(n), uintptr(unsafe.Pointer(textures)), 0)
+}
+
+func glBindTexture(target, texture uint32) {
+	syscall.Syscall(gl.bindTexture, 2, uintptr(target), uintptr(texture), 0)
+}
+
+func glTexImage2D(target uint32, level int32, internalFormat int32, width int32, height int32, border int32, format uint32, xtype uint32, pixels unsafe.Pointer) {
+	syscall.Syscall9(gl.texImage2D, 9,
+		uintptr(target), uintptr(level), uintptr(internalFormat), uintptr(width), uintptr(height), uintptr(border), uintptr(format), uintptr(xtype), uintptr(pixels))
+}
+
+func glTexParameteri(target uint32, pname uint32, param int32) {
+	syscall.Syscall(gl.texParameteri, 3, uintptr(target), uintptr(pname), uintptr(param))
+}
+
+func glPixelStorei(pname uint32, param int32) {
+	syscall.Syscall(gl.pixelStorei, 2, uintptr(pname), uintptr(param), 0)
+}
+
+func glActiveTexture(unit uint32) {
+	syscall.Syscall(gl.activeTexture, 1, uintptr(unit), 0, 0)
+}
+
+func glDeleteTextures(n int32, textures *uint32) {
+	syscall.Syscall(gl.deleteTextures, 2, uintptr(n), uintptr(unsafe.Pointer(textures)), 0)
 }

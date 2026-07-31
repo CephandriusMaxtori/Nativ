@@ -13,10 +13,11 @@ import (
 )
 
 var (
-	user32 = windows.NewLazySystemDLL("user32.dll")
-	gdi32  = windows.NewLazySystemDLL("gdi32.dll")
+	kernel32 = windows.NewLazySystemDLL("kernel32.dll")
+	user32   = windows.NewLazySystemDLL("user32.dll")
+	gdi32    = windows.NewLazySystemDLL("gdi32.dll")
 
-	procGetModuleHandleW   = user32.NewProc("GetModuleHandleW")
+	procGetModuleHandleW = kernel32.NewProc("GetModuleHandleW")
 	procRegisterClassExW   = user32.NewProc("RegisterClassExW")
 	procCreateWindowExW    = user32.NewProc("CreateWindowExW")
 	procDestroyWindow      = user32.NewProc("DestroyWindow")

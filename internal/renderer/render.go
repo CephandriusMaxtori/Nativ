@@ -11,12 +11,15 @@ import (
 type DrawCommand struct {
 	X, Y, Width, Height float32
 	R, G, B, A          float32
+	Text                string
+	Font                *Font
 }
 
 type Renderer interface {
-	Init(platform.Platform) error
+	Init(plat platform.Platform, width, height int) error
 	Draw([]DrawCommand) error
 	Shutdown() error
+	SetSize(width, height int)
 }
 
 var (

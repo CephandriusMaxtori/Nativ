@@ -54,8 +54,9 @@ func TestNewBackendUnknown(t *testing.T) {
 
 type mockRenderer struct{}
 
-func (m *mockRenderer) Init(_ platform.Platform) error { return nil }
-func (m *mockRenderer) Draw(_ []DrawCommand) error     { return nil }
-func (m *mockRenderer) Shutdown() error                { return nil }
+func (m *mockRenderer) Init(_ platform.Platform, _, _ int) error { return nil }
+func (m *mockRenderer) Draw(_ []DrawCommand) error                { return nil }
+func (m *mockRenderer) Shutdown() error                           { return nil }
+func (m *mockRenderer) SetSize(_, _ int)                          {}
 
 var _ Renderer = (*mockRenderer)(nil)

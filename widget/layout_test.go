@@ -128,8 +128,8 @@ func TestLayoutDraw(t *testing.T) {
 	cmds := make([]renderer.DrawCommand, 0, 10)
 	l.Draw(&cmds)
 
-	if len(cmds) != 4 {
-		t.Fatalf("expected 4 commands (2 buttons x 2), got %d", len(cmds))
+	if len(cmds) != 6 {
+		t.Fatalf("expected 6 commands (2 buttons x 3 each), got %d", len(cmds))
 	}
 }
 

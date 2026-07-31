@@ -35,7 +35,7 @@ func NewWindow(title string, width, height int, rendererName string) (*Window, e
 		return nil, fmt.Errorf("nativ: %w", err)
 	}
 
-	if err := r.Init(p); err != nil {
+	if err := r.Init(p, width, height); err != nil {
 		r.Shutdown()
 		p.Destroy()
 		return nil, fmt.Errorf("nativ: %w", err)
@@ -94,6 +94,7 @@ func (w *Window) handleEvent(evt event.Event) {
 	case event.Resize:
 		w.width = evt.Width
 		w.height = evt.Height
+		w.renderer.SetSize(w.width, w.height)
 		if w.root != nil {
 			w.root.SetBounds(0, 0, float32(w.width), float32(w.height))
 		}
