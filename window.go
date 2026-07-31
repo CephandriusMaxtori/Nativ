@@ -31,10 +31,13 @@ func NewWindow(title string, width, height int, rendererName string) (*Window, e
 
 	r, err := renderer.NewBackend(rendererName)
 	if err != nil {
+		p.Destroy()
 		return nil, fmt.Errorf("nativ: %w", err)
 	}
 
 	if err := r.Init(p); err != nil {
+		r.Shutdown()
+		p.Destroy()
 		return nil, fmt.Errorf("nativ: %w", err)
 	}
 
@@ -102,6 +105,9 @@ func (w *Window) handleEvent(evt event.Event) {
 }
 
 func (w *Window) renderFrame() {
+	if w.renderer == nil {
+		return
+	}
 	cmds := make([]renderer.DrawCommand, 0, 1024)
 	if w.root != nil {
 		w.root.Draw(&cmds)

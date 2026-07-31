@@ -62,10 +62,19 @@ func (l *BoxLayout) relayout() {
 		pw = 800
 		ph = 600
 	}
+	if l.padding*2 >= ph {
+		l.padding = ph / 4
+	}
+	if l.padding*2 >= pw {
+		l.padding = pw / 4
+	}
+	if l.spacing >= ph {
+		l.spacing = ph / 4
+	}
 
 	if l.dir == Vertical {
-		totalContentH := ph - 2*l.padding
-		contentW := pw - 2*l.padding
+		totalContentH := max(ph-2*l.padding, 0)
+		contentW := max(pw-2*l.padding, 0)
 		childCount := len(l.children)
 
 		if childCount == 0 {
@@ -76,6 +85,7 @@ func (l *BoxLayout) relayout() {
 		if childH < 20 {
 			childH = 30
 		}
+		childH = min(childH, ph)
 
 		y := py + l.padding
 		for _, c := range l.children {
@@ -83,8 +93,8 @@ func (l *BoxLayout) relayout() {
 			y += childH + l.spacing
 		}
 	} else {
-		totalContentW := pw - 2*l.padding
-		contentH := ph - 2*l.padding
+		totalContentW := max(pw-2*l.padding, 0)
+		contentH := max(ph-2*l.padding, 0)
 		childCount := len(l.children)
 
 		if childCount == 0 {
@@ -95,6 +105,7 @@ func (l *BoxLayout) relayout() {
 		if childW < 40 {
 			childW = 80
 		}
+		childW = min(childW, pw)
 
 		x := px + l.padding
 		for _, c := range l.children {

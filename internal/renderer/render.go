@@ -3,6 +3,7 @@ package renderer
 import (
 	"errors"
 	"fmt"
+	"sync"
 
 	"github.com/CephandriusMaxtori/Nativ/internal/platform"
 )
@@ -18,14 +19,21 @@ type Renderer interface {
 	Shutdown() error
 }
 
-var backends = map[string]func() Renderer{}
+var (
+	backends   = map[string]func() Renderer{}
+	backendsMu sync.RWMutex
+)
 
 func RegisterBackend(name string, factory func() Renderer) {
+	backendsMu.Lock()
 	backends[name] = factory
+	backendsMu.Unlock()
 }
 
 func NewBackend(name string) (Renderer, error) {
+	backendsMu.RLock()
 	f, ok := backends[name]
+	backendsMu.RUnlock()
 	if !ok {
 		return nil, fmt.Errorf("nativ: unknown renderer backend %q", name)
 	}
@@ -33,10 +41,12 @@ func NewBackend(name string) (Renderer, error) {
 }
 
 func ListBackends() []string {
+	backendsMu.RLock()
 	names := make([]string, 0, len(backends))
 	for n := range backends {
 		names = append(names, n)
 	}
+	backendsMu.RUnlock()
 	return names
 }
 

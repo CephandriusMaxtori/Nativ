@@ -4,6 +4,7 @@ package platform
 
 import (
 	"runtime"
+	"sync"
 	"syscall"
 	"unsafe"
 
@@ -33,6 +34,10 @@ var (
 	procGetWindowLongPtrW  = user32.NewProc("GetWindowLongPtrW")
 	procAdjustWindowRect   = user32.NewProc("AdjustWindowRect")
 	procGetMessageW        = user32.NewProc("GetMessageW")
+	procWaitMessage        = user32.NewProc("WaitMessage")
+	procUnregisterClassW   = user32.NewProc("UnregisterClassW")
+
+	procGetStockObject = gdi32.NewProc("GetStockObject")
 )
 
 const (
@@ -86,11 +91,16 @@ type msg struct {
 var wndprocCallback = syscall.NewCallback(wndProc)
 var currentPlatform *win32Platform
 
+var (
+	registeredClass uint16
+	className16     *uint16
+	registerOnce    sync.Once
+)
+
 type win32Platform struct {
 	hwnd         windows.Handle
 	hdc          windows.Handle
 	hinstance    windows.Handle
-	classAtom    uint16
 	eventHandler func(event.Event)
 	quit         bool
 }
@@ -103,6 +113,40 @@ func (p *win32Platform) Hwnd() uintptr { return uintptr(p.hwnd) }
 func (p *win32Platform) Hdc() uintptr  { return uintptr(p.hdc) }
 func (p *win32Platform) PostQuit()     { p.quit = true }
 
+func ensureWindowClass(hinstance windows.Handle) (uintptr, error) {
+	var regErr error
+	registerOnce.Do(func() {
+		var err error
+		className16, err = windows.UTF16PtrFromString("NativWindow")
+		if err != nil {
+			regErr = err
+			return
+		}
+
+		wc := wndClassEx{
+			size:      uint32(unsafe.Sizeof(wndClassEx{})),
+			style:     csHRedraw | csVRedraw | csDblClks,
+			wndProc:   wndprocCallback,
+			instance:  hinstance,
+			cursor:    loadStandardCursor(),
+			className: className16,
+		}
+
+		r, _, _ := procGetStockObject.Call(uintptr(5)) // WHITE_BRUSH
+		if r != 0 {
+			wc.background = windows.Handle(r)
+		}
+
+		atom, _, err := procRegisterClassExW.Call(uintptr(unsafe.Pointer(&wc)))
+		if atom == 0 {
+			regErr = err
+			return
+		}
+		registeredClass = uint16(atom)
+	})
+	return uintptr(registeredClass), regErr
+}
+
 func (p *win32Platform) CreateWindow(title string, width, height int) (uintptr, uintptr, error) {
 	runtime.LockOSThread()
 
@@ -112,33 +156,9 @@ func (p *win32Platform) CreateWindow(title string, width, height int) (uintptr, 
 	}
 	p.hinstance = windows.Handle(hinstance)
 
-	className, err := windows.UTF16PtrFromString("NativWindow")
-	if err != nil {
+	if _, err := ensureWindowClass(p.hinstance); err != nil {
 		return 0, 0, err
 	}
-
-	wc := wndClassEx{
-		size:       uint32(unsafe.Sizeof(wndClassEx{})),
-		style:      csHRedraw | csVRedraw | csDblClks,
-		wndProc:    wndprocCallback,
-		instance:   p.hinstance,
-		cursor:     loadStandardCursor(),
-		background: 0,
-		className:  className,
-	}
-
-	// Set background brush to COLOR_WINDOW+1
-	procGetStockObject := gdi32.NewProc("GetStockObject")
-	r, _, _ := procGetStockObject.Call(uintptr(5)) // WHITE_BRUSH
-	if r != 0 {
-		wc.background = windows.Handle(r)
-	}
-
-	atom, _, err := procRegisterClassExW.Call(uintptr(unsafe.Pointer(&wc)))
-	if atom == 0 {
-		return 0, 0, err
-	}
-	p.classAtom = uint16(atom)
 
 	titleUTF16, err := windows.UTF16PtrFromString(title)
 	if err != nil {
@@ -164,7 +184,7 @@ func (p *win32Platform) CreateWindow(title string, width, height int) (uintptr, 
 
 	hwnd, _, err := procCreateWindowExW.Call(
 		0,
-		uintptr(unsafe.Pointer(className)),
+		uintptr(unsafe.Pointer(className16)),
 		uintptr(unsafe.Pointer(titleUTF16)),
 		wsOverlappedWindow,
 		0,
@@ -177,6 +197,7 @@ func (p *win32Platform) CreateWindow(title string, width, height int) (uintptr, 
 		0,
 	)
 	if hwnd == 0 {
+		currentPlatform = nil
 		return 0, 0, err
 	}
 	p.hwnd = windows.Handle(hwnd)
@@ -201,6 +222,7 @@ func (p *win32Platform) Pump(eventHandler func(event.Event), render func()) erro
 
 	var m msg
 	for !p.quit {
+		hadMessages := false
 		for {
 			r, _, _ := procPeekMessageW.Call(
 				uintptr(unsafe.Pointer(&m)),
@@ -212,6 +234,7 @@ func (p *win32Platform) Pump(eventHandler func(event.Event), render func()) erro
 			if r == 0 {
 				break
 			}
+			hadMessages = true
 			if m.message == wmDestroy {
 				p.quit = true
 				break
@@ -220,36 +243,38 @@ func (p *win32Platform) Pump(eventHandler func(event.Event), render func()) erro
 			procDispatchMessageW.Call(uintptr(unsafe.Pointer(&m)))
 		}
 
-		if p.quit {
-			break
-		}
-
 		render()
 
-		procGetMessageW.Call(
-			uintptr(unsafe.Pointer(&m)),
-			0,
-			0,
-			0,
-		)
-		if m.message == wmDestroy {
-			break
+		if !p.quit && !hadMessages {
+			procWaitMessage.Call()
 		}
-		procTranslateMessage.Call(uintptr(unsafe.Pointer(&m)))
-		procDispatchMessageW.Call(uintptr(unsafe.Pointer(&m)))
 	}
 
 	return nil
 }
 
 func (p *win32Platform) Destroy() {
-	if p.hwnd != 0 {
-		procDestroyWindow.Call(uintptr(p.hwnd))
-	}
 	if p.hdc != 0 {
 		procReleaseDC.Call(uintptr(p.hwnd), uintptr(p.hdc))
+		p.hdc = 0
 	}
-	currentPlatform = nil
+	if p.hwnd != 0 {
+		procDestroyWindow.Call(uintptr(p.hwnd))
+		p.hwnd = 0
+	}
+	if currentPlatform == p {
+		currentPlatform = nil
+	}
+}
+
+func unregisterWindowClass(hinstance windows.Handle) {
+	if registeredClass != 0 {
+		procUnregisterClassW.Call(
+			uintptr(unsafe.Pointer(className16)),
+			uintptr(hinstance),
+		)
+		registeredClass = 0
+	}
 }
 
 func loadStandardCursor() windows.Handle {
