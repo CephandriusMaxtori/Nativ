@@ -1,6 +1,7 @@
 # Nativ
 
 ![WIP](https://img.shields.io/badge/status-WIP-yellow)
+[![Docs](https://img.shields.io/badge/docs-github.io-blue)](https://cephandriusmaxtori.github.io/Nativ/)
 
 **Pure Go GUI library — zero Cgo dependencies.**
 
