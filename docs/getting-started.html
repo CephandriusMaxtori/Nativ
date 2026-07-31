@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Getting Started — Nativ</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.7;max-width:820px;margin:0 auto;padding:2em 1.5em;background:#1a1a1f;color:#ddd}
+a{color:#6af}
+a:hover{color:#8cf}
+pre{background:#22222b;padding:1em;border-radius:6px;overflow-x:auto;font-size:14px;color:#d4d4d8}
+code{background:#22222b;padding:2px 6px;border-radius:3px;font-size:.92em}
+pre code{background:none;padding:0}
+h1,h2,h3{color:#eee;margin-top:1.8em}
+.nav{margin-bottom:2em;font-size:.92em}
+.nav a{margin-right:1em}
+</style>
+</head>
+<body>
+
+<p class="nav"><a href="index.html">Home</a> <a href="architecture.html">Architecture</a> <a href="api.html">API</a></p>
+
+<h1>Getting Started</h1>
+
+<h2>Prerequisites</h2>
+<ul>
+<li>Go 1.21+</li>
+<li>Windows 10+ (v0.1)</li>
+<li>GPU with OpenGL 3.3+ drivers</li>
+</ul>
+
+<h2>Install the demo</h2>
+<pre>go install github.com/CephandriusMaxtori/Nativ/cmd/demo@latest
+demo -renderer=opengl</pre>
+
+<h2>Build from source</h2>
+<pre>git clone https://github.com/CephandriusMaxtori/Nativ.git
+cd Nativ
+go build ./...
+go run ./cmd/demo/ -renderer=opengl</pre>
+
+<h2>Run the counter example</h2>
+<pre>go run ./examples/counter/ -renderer=opengl</pre>
+<p>A window with <code>+</code>, <code>-</code>, <code>Reset</code>, and <code>Quit</code> buttons and a count label.</p>
+
+<h2>Use as a dependency</h2>
+<pre>go get github.com/CephandriusMaxtori/Nativ@v0.1.0</pre>
+<pre>package main
+
+import (
+    "fmt"
+    nativ "github.com/CephandriusMaxtori/Nativ"
+    "github.com/CephandriusMaxtori/Nativ/widget"
+)
+
+func main() {
+    nativ.Init()
+    win, _ := nativ.NewWindow("Hello", 400, 300, "opengl")
+
+    btn := widget.NewButton("Click me")
+    btn.OnClick = func() { fmt.Println("clicked") }
+
+    layout := widget.NewVBoxLayout()
+    layout.Add(widget.NewLabel("Hello from Nativ"))
+    layout.Add(btn)
+
+    win.SetRoot(layout)
+    win.Show()
+    win.Run()
+    nativ.Quit()
+}</pre>
+
+<h2>Run the tests</h2>
+<pre>go test -count=1 ./...</pre>
+
+</body>
+</html>

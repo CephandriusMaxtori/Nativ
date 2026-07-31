@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Architecture — Nativ</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.7;max-width:820px;margin:0 auto;padding:2em 1.5em;background:#1a1a1f;color:#ddd}
+a{color:#6af}
+a:hover{color:#8cf}
+pre{background:#22222b;padding:1em;border-radius:6px;overflow-x:auto;font-size:14px;color:#d4d4d8}
+code{background:#22222b;padding:2px 6px;border-radius:3px;font-size:.92em}
+pre code{background:none;padding:0}
+h1,h2,h3{color:#eee;margin-top:1.8em}
+.nav{margin-bottom:2em;font-size:.92em}
+.nav a{margin-right:1em}
+</style>
+</head>
+<body>
+
+<p class="nav"><a href="index.html">Home</a> <a href="getting-started.html">Getting Started</a> <a href="api.html">API</a></p>
+
+<h1>Architecture</h1>
+
+<h2>Package layout</h2>
+<pre>nativ/
+├── app.go                    # Init/Quit lifecycle
+├── backends_windows.go       # Blank-imports OpenGL backend
+├── window.go                 # Public Window API
+
+├── internal/
+│   ├── event/
+│   │   └── event.go          # MouseDown/Up/Move, Resize, Close
+│   ├── platform/
+│   │   ├── platform.go       # Platform interface
+│   │   ├── platform_windows.go   # Win32 implementation
+│   │   └── stub.go           # Linux/macOS stub
+│   └── renderer/
+│       ├── render.go         # Renderer interface + backend registry
+│       ├── opengl/
+│       │   ├── gl.go         # GL function pointer loading
+│       │   ├── renderer.go   # Shader-based quad renderer
+│       │   └── wgl.go        # WGL context creation
+│       └── vulkan/           # Disabled (needs WSI surface bindings)
+
+├── widget/
+│   ├── widget.go             # Widget interface + BaseWidget
+│   ├── button.go             # Button with hover/press/click
+│   ├── label.go              # Static label
+│   └── layout.go             # VBox/HBox layout
+
+└── examples/
+    └── counter/              # Interactive counter demo</pre>
+
+<h2>Design decisions</h2>
+
+<h3>Zero Cgo</h3>
+<p>All Windows API and OpenGL calls use <code>syscall</code> and
+<code>golang.org/x/sys/windows</code> to dynamically load DLLs and call
+functions at runtime. No C compiler, no GPU SDK, no external DLLs to ship.</p>
+<ul>
+<li>Single-binary deployment</li>
+<li>Trivial cross-compilation</li>
+<li>No C toolchain in CI</li>
+<li>Easy <code>go build</code> / <code>go test</code></li>
+</ul>
+
+<h3>Platform abstraction</h3>
+<p>The <code>Platform</code> interface abstracts OS-specific windowing:</p>
+<ul>
+<li><code>CreateWindow</code>, <code>Pump</code>, <code>Destroy</code>, <code>PostQuit</code></li>
+<li>Build tags select the right implementation</li>
+<li>Non-Windows builds compile but return <code>ErrUnsupported</code> at runtime</li>
+</ul>
+
+<h3>Renderer backends</h3>
+<p>The <code>Renderer</code> interface abstracts GPU rendering:</p>
+<ul>
+<li><code>Init</code>, <code>Draw</code>, <code>Shutdown</code></li>
+<li>Backends self-register via <code>init()</code> functions</li>
+<li><code>RegisterBackend</code> / <code>NewBackend</code> / <code>ListBackends</code></li>
+</ul>
+
+<h3>Widget tree</h3>
+<p>Widgets form a tree with parent/child relationships:</p>
+<ul>
+<li><code>Widget</code> interface: Bounds, SetBounds, Draw, HandleEvent</li>
+<li><code>BaseWidget</code> provides default implementations</li>
+<li><code>BoxLayout</code> distributes space evenly among children</li>
+<li>Events dispatch in reverse Z-order (last child wins)</li>
+</ul>
+
+<h3>Message pump</h3>
+<p>The Win32 message pump uses <code>PeekMessageW</code> (non-blocking) to
+drain the message queue each frame, then falls back to
+<code>WaitMessage</code> when idle. This allows continuous rendering for
+animations while keeping CPU usage near zero when the window is idle.</p>
+
+</body>
+</html>

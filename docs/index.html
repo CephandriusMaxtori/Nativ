@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nativ — Pure Go GUI library</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.7;max-width:820px;margin:0 auto;padding:2em 1.5em;background:#1a1a1f;color:#ddd}
+a{color:#6af}
+a:hover{color:#8cf}
+pre{background:#22222b;padding:1em;border-radius:6px;overflow-x:auto;font-size:14px;color:#d4d4d8}
+code{background:#22222b;padding:2px 6px;border-radius:3px;font-size:.92em}
+pre code{background:none;padding:0}
+h1,h2,h3{color:#eee;margin-top:1.8em}
+table{border-collapse:collapse;width:100%;margin:1em 0}
+td,th{border:1px solid #333;padding:8px 12px;text-align:left}
+th{background:#22222b;color:#eee}
+tr:nth-child(even){background:#1e1e24}
+tr:nth-child(odd){background:#1a1a1f}
+hr{border:none;border-top:1px solid #333;margin:2em 0}
+blockquote{border-left:3px solid #6af;padding:.5em 1em;margin:1em 0;background:#22222b;border-radius:4px}
+.badge img{vertical-align:middle}
+</style>
+</head>
+<body>
+
+<h1>Nativ</h1>
+<p class="badge">
+  <img src="https://img.shields.io/badge/status-WIP-yellow" alt="WIP">
+  <a href="https://github.com/CephandriusMaxtori/Nativ"><img src="https://img.shields.io/badge/source-github.com-6af" alt="Source"></a>
+</p>
+
+<p><strong>Pure Go GUI library — zero Cgo dependencies.</strong></p>
+
+<p>Nativ provides a hardware-accelerated GUI toolkit for Go on Windows, with a
+cross-platform architecture designed for Linux/macOS. It targets OpenGL 3.3+
+without requiring any external C libraries, GPU SDKs, or framework bindings.</p>
+
+<h2>Features</h2>
+<ul>
+<li><strong>Zero Cgo</strong> — all system APIs (Win32, OpenGL) called via <code>syscall</code> at runtime</li>
+<li><strong>Hardware-accelerated</strong> — OpenGL 3.3+ renderer via <code>opengl32.dll</code></li>
+<li><strong>Widget system</strong> — Button, Label, BoxLayout (VBox/HBox)</li>
+<li><strong>Event system</strong> — mouse events, window resize, close</li>
+<li><strong>Cross-platform architecture</strong> — Platform interface + build tags</li>
+</ul>
+
+<h2>Quick start</h2>
+<pre>go install github.com/CephandriusMaxtori/Nativ/cmd/demo@latest
+demo -renderer=opengl</pre>
+
+<p>Or run the counter example:</p>
+<pre>go run github.com/CephandriusMaxtori/Nativ/examples/counter@latest -renderer=opengl</pre>
+
+<h2>Status</h2>
+<p>v0.1 — Windows-only, pre-alpha. Linux/macOS stubs return <code>ErrUnsupported</code>.</p>
+<table>
+<tr><th>Component</th><th>Status</th></tr>
+<tr><td>Win32 window + event loop</td><td>Stable</td></tr>
+<tr><td>OpenGL renderer (opengl32.dll)</td><td>Stable</td></tr>
+<tr><td>Widget system (Button, Label, BoxLayout)</td><td>Stable</td></tr>
+<tr><td>Vulkan renderer</td><td>Blocked (no WSI surface bindings)</td></tr>
+<tr><td>Text rendering</td><td>Planned (v0.2)</td></tr>
+<tr><td>Linux (X11/Wayland)</td><td>Stub</td></tr>
+<tr><td>macOS (Cocoa)</td><td>Stub</td></tr>
+</table>
+
+<h2>Documentation</h2>
+<ul>
+<li><a href="getting-started.html">Getting Started</a> — install, build, run</li>
+<li><a href="architecture.html">Architecture</a> — package layout, design decisions</li>
+<li><a href="api.html">API Reference</a> — widgets, window, events, renderer</li>
+</ul>
+
+</body>
+</html>
