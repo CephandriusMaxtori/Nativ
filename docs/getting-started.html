@@ -18,14 +18,14 @@ h1,h2,h3{color:#eee;margin-top:1.8em}
 </head>
 <body>
 
-<p class="nav"><a href="index.html">Home</a> <a href="architecture.html">Architecture</a> <a href="api.html">API</a></p>
+<p class="nav"><a href="index.html">Home</a> <a href="architecture.html">Architecture</a> <a href="fonts.html">Fonts</a> <a href="api.html">API</a></p>
 
 <h1>Getting Started</h1>
 
 <h2>Prerequisites</h2>
 <ul>
-<li>Go 1.21+</li>
-<li>Windows 10+ (v0.1)</li>
+<li>Go 1.25+</li>
+<li>Windows 10+ (v0.2)</li>
 <li>GPU with OpenGL 3.3+ drivers</li>
 </ul>
 
@@ -69,6 +69,17 @@ func main() {
     win.Run()
     nativ.Quit()
 }</pre>
+
+<h2>Use a custom font</h2>
+<p>Labels and buttons accept any TTF/OTF font loaded via
+<code>nativ.LoadFont</code>. See
+<a href="fonts.html">Text Rendering &amp; Fonts</a> for details.</p>
+<pre>custom, err := nativ.LoadFont("C:\\Windows\\Fonts\\segoeui.ttf", 16)
+if err != nil {
+    log.Fatal(err)
+}
+label := widget.NewLabel("Set in Segoe UI")
+label.Font = custom</pre>
 
 <h2>Run the tests</h2>
 <pre>go test -count=1 ./...</pre>

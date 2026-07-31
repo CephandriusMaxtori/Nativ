@@ -21,7 +21,7 @@ h3{color:#9cf;font-size:1.1em;margin-bottom:.5em}
 </head>
 <body>
 
-<p class="nav"><a href="index.html">Home</a> <a href="getting-started.html">Getting Started</a> <a href="architecture.html">Architecture</a></p>
+<p class="nav"><a href="index.html">Home</a> <a href="getting-started.html">Getting Started</a> <a href="architecture.html">Architecture</a> <a href="fonts.html">Fonts</a></p>
 
 <h1>API Reference</h1>
 
@@ -43,6 +43,20 @@ h3{color:#9cf;font-size:1.1em;margin-bottom:.5em}
 <h3>func <code>AvailableRenderers</code></h3>
 <div class="decl"><code>func AvailableRenderers() []string</code></div>
 <p>List registered renderer backends.</p>
+
+<h3>type <code>Font</code></h3>
+<div class="decl"><code>type Font struct { /* unexported */ }</code></div>
+<p>An immutable font (parsed TTF/OTF plus a pixel size). Create one with
+<code>LoadFont</code> or <code>LoadFontFromData</code>, then assign it to a
+widget's <code>Font</code> field. See <a href="fonts.html">Text Rendering &amp; Fonts</a>.</p>
+
+<h3>func <code>LoadFont</code></h3>
+<div class="decl"><code>func LoadFont(path string, size float64) (*Font, error)</code></div>
+<p>Load a TTF/OTF font from a file. <code>size</code> is in pixels at 72 DPI.</p>
+
+<h3>func <code>LoadFontFromData</code></h3>
+<div class="decl"><code>func LoadFontFromData(data []byte, size float64) (*Font, error)</code></div>
+<p>Load a TTF/OTF font from an in-memory buffer.</p>
 
 <h3>type <code>Window</code></h3>
 <div class="decl"><code>func NewWindow(title string, width, height int, rendererName string) (*Window, error)</code></div>
@@ -80,6 +94,7 @@ h3{color:#9cf;font-size:1.1em;margin-bottom:.5em}
 <p>Create a button with the given text. Visual states: normal (green), hovered (lighter), pressed (darker).</p>
 <div class="decl"><code>type Button struct {
     Text    string
+    Font    *nativ.Font // nil uses the built-in 7x13 bitmap font
     OnClick func()
     // ...
 }</code></div>
@@ -89,6 +104,7 @@ h3{color:#9cf;font-size:1.1em;margin-bottom:.5em}
 <div class="decl"><code>func NewLabel(text string) *Label</code></div>
 <div class="decl"><code>type Label struct {
     Text string
+    Font *nativ.Font // nil uses the built-in 7x13 bitmap font
     // ...
 }</code></div>
 
@@ -131,15 +147,22 @@ const (
 <div class="decl"><code>type DrawCommand struct {
     X, Y, Width, Height float32
     R, G, B, A          float32
+    Text                string
+    Font                *Font // nil means the default 7x13 font
 }</code></div>
-<p>A colored rectangle to render. Coordinates are in window pixel space, origin at top-left.</p>
+<p>A rectangle to render: either a solid quad (empty <code>Text</code>) or text
+glyphs drawn at <code>(X, Y)</code> in the given color. Coordinates are in
+window pixel space, origin at top-left.</p>
 
 <h3>type <code>Renderer</code></h3>
 <div class="decl"><code>type Renderer interface {
-    Init(platform.Platform) error
+    Init(platform.Platform, width, height int) error
     Draw([]DrawCommand) error
     Shutdown() error
+    SetSize(width, height int)
 }</code></div>
+<p><code>SetSize</code> is called by the window on resize events so the
+viewport matches the window's pixel dimensions.</p>
 
 <h3>Backend registry</h3>
 <div class="decl"><code>func RegisterBackend(name string, factory func() Renderer)

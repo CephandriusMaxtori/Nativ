@@ -40,6 +40,7 @@ without requiring any external C libraries, GPU SDKs, or framework bindings.</p>
 <ul>
 <li><strong>Zero Cgo</strong> — all system APIs (Win32, OpenGL) called via <code>syscall</code> at runtime</li>
 <li><strong>Hardware-accelerated</strong> — OpenGL 3.3+ renderer via <code>opengl32.dll</code></li>
+<li><strong>Text rendering</strong> — built-in bitmap font plus custom TTF/OTF fonts at any size</li>
 <li><strong>Widget system</strong> — Button, Label, BoxLayout (VBox/HBox)</li>
 <li><strong>Event system</strong> — mouse events, window resize, close</li>
 <li><strong>Cross-platform architecture</strong> — Platform interface + build tags</li>
@@ -53,14 +54,15 @@ demo -renderer=opengl</pre>
 <pre>go run github.com/CephandriusMaxtori/Nativ/examples/counter@latest -renderer=opengl</pre>
 
 <h2>Status</h2>
-<p>v0.1 — Windows-only, pre-alpha. Linux/macOS stubs return <code>ErrUnsupported</code>.</p>
+<p>v0.2 — Windows, pre-alpha. Linux/macOS stubs return <code>ErrUnsupported</code>.</p>
 <table>
 <tr><th>Component</th><th>Status</th></tr>
 <tr><td>Win32 window + event loop</td><td>Stable</td></tr>
 <tr><td>OpenGL renderer (opengl32.dll)</td><td>Stable</td></tr>
 <tr><td>Widget system (Button, Label, BoxLayout)</td><td>Stable</td></tr>
+<tr><td>Text rendering (bitmap + TTF/OTF)</td><td>Stable</td></tr>
 <tr><td>Vulkan renderer</td><td>Blocked (no WSI surface bindings)</td></tr>
-<tr><td>Text rendering</td><td>Planned (v0.2)</td></tr>
+<tr><td>Entry widget (text input)</td><td>In progress</td></tr>
 <tr><td>Linux (X11/Wayland)</td><td>Stub</td></tr>
 <tr><td>macOS (Cocoa)</td><td>Stub</td></tr>
 </table>
@@ -69,6 +71,7 @@ demo -renderer=opengl</pre>
 <ul>
 <li><a href="getting-started.html">Getting Started</a> — install, build, run</li>
 <li><a href="architecture.html">Architecture</a> — package layout, design decisions</li>
+<li><a href="fonts.html">Text Rendering &amp; Fonts</a> — custom TTF/OTF font usage</li>
 <li><a href="api.html">API Reference</a> — widgets, window, events, renderer</li>
 </ul>
 

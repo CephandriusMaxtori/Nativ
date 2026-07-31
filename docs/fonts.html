@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Text Rendering &amp; Fonts — Nativ</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.7;max-width:820px;margin:0 auto;padding:2em 1.5em;background:#1a1a1f;color:#ddd}
+a{color:#6af}
+a:hover{color:#8cf}
+pre{background:#22222b;padding:1em;border-radius:6px;overflow-x:auto;font-size:14px;color:#d4d4d8}
+code{background:#22222b;padding:2px 6px;border-radius:3px;font-size:.92em}
+pre code{background:none;padding:0}
+h1,h2,h3{color:#eee;margin-top:1.8em}
+h3{color:#9cf;font-size:1.1em;margin-bottom:.5em}
+.nav{margin-bottom:2em;font-size:.92em}
+.nav a{margin-right:1em}
+.decl{background:#22222b;padding:1em;border-radius:6px;overflow-x:auto;margin:.8em 0}
+.decl code{background:none;padding:0;font-size:14px}
+</style>
+</head>
+<body>
+
+<p class="nav"><a href="index.html">Home</a> <a href="getting-started.html">Getting Started</a> <a href="architecture.html">Architecture</a> <a href="api.html">API</a></p>
+
+<h1>Text Rendering &amp; Fonts</h1>
+
+<p>Nativ renders text by rasterizing glyphs into GPU textures and drawing them
+with the same textured-quad pipeline used for solid rectangles. Two font
+pipelines are supported:</p>
+<ul>
+<li><strong>Bitmap fonts</strong> — a built-in 7x13 fixed-width font, zero setup</li>
+<li><strong>TrueType / OpenType fonts</strong> — any TTF/OTF file, at any size,
+rasterized per glyph by <code>golang.org/x/image/font/opentype</code></li>
+</ul>
+
+<h2>Default font</h2>
+<p>Labels and buttons use <code>basicfont.Face7x13</code> unless a custom
+<code>Font</code> is assigned. It covers ASCII 32&ndash;126 and needs no setup:</p>
+<div class="decl"><code>label := widget.NewLabel("Hello") // renders with the built-in 7x13 font</code></div>
+
+<h2>Loading a custom font</h2>
+<p>Use the top-level <code>nativ</code> package to load a TTF/OTF font from a
+file or from an in-memory <code>[]byte</code>. The size is in pixels at 72 DPI.</p>
+
+<h3>func <code>LoadFont</code></h3>
+<div class="decl"><code>func LoadFont(path string, size float64) (*Font, error)</code></div>
+<p>Load a font from a file path.</p>
+
+<h3>func <code>LoadFontFromData</code></h3>
+<div class="decl"><code>func LoadFontFromData(data []byte, size float64) (*Font, error)</code></div>
+<p>Load a font from an in-memory buffer (useful for embedded fonts via
+<code>go:embed</code>).</p>
+
+<h2>Using a custom font</h2>
+<p>Assign the returned <code>*Font</code> to a widget's <code>Font</code> field.
+Different fonts <em>and</em> different sizes create separate cached atlases.</p>
+<pre>custom, err := nativ.LoadFont("C:\\Windows\\Fonts\\segoeui.ttf", 16)
+if err != nil {
+    log.Fatal(err) // widget falls back to the default 7x13 font if nil
+}
+
+big, err := nativ.LoadFont("C:\\Windows\\Fonts\\segoeui.ttf", 24)
+if err != nil {
+    log.Fatal(err)
+}
+
+title := widget.NewLabel("Heading")
+title.Font = big
+
+body := widget.NewLabel("Body text in Segoe UI")
+body.Font = custom
+
+btn := widget.NewButton("OK")
+btn.Font = custom</pre>
+
+<h3>Embedding a font</h3>
+<pre>import "embed"
+
+//go:embed assets/Roboto.ttf
+var robotoData []byte
+
+func main() {
+    roboto, _ := nativ.LoadFontFromData(robotoData, 14)
+    // ...
+}</pre>
+
+<h2>How it works</h2>
+<p>Each unique <code>Font</code>+size pair gets a lazily-built glyph atlas the
+first time it is drawn. Glyphs are rasterized to an alpha mask, uploaded once
+to the GPU, and cached for the lifetime of the process. The fragment shader
+samples the atlas <code>.r</code> channel as the alpha value so glyphs composite
+correctly over any background color.</p>
+
+<h2>DrawCommand text</h2>
+<p>Text is emitted as <code>renderer.DrawCommand</code> values with the
+<code>Text</code> and <code>Font</code> fields set (see the
+<a href="api.html">API Reference</a>). Solid-colored quads and text share one
+draw call pipeline, batched by font.</p>
+
+</body>
+</html>

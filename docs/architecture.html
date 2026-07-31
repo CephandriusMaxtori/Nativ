@@ -18,13 +18,13 @@ h1,h2,h3{color:#eee;margin-top:1.8em}
 </head>
 <body>
 
-<p class="nav"><a href="index.html">Home</a> <a href="getting-started.html">Getting Started</a> <a href="api.html">API</a></p>
+<p class="nav"><a href="index.html">Home</a> <a href="getting-started.html">Getting Started</a> <a href="fonts.html">Fonts</a> <a href="api.html">API</a></p>
 
 <h1>Architecture</h1>
 
 <h2>Package layout</h2>
 <pre>nativ/
-├── app.go                    # Init/Quit lifecycle
+├── app.go                    # Init/Quit lifecycle, LoadFont/LoadFontFromData
 ├── backends_windows.go       # Blank-imports OpenGL backend
 ├── window.go                 # Public Window API
 
@@ -36,19 +36,22 @@ h1,h2,h3{color:#eee;margin-top:1.8em}
 │   │   ├── platform_windows.go   # Win32 implementation
 │   │   └── stub.go           # Linux/macOS stub
 │   └── renderer/
-│       ├── render.go         # Renderer interface + backend registry
+│       ├── render.go         # Renderer interface + DrawCommand + registry
+│       ├── font.go           # Font type (sfnt/opentype parsing)
 │       ├── opengl/
 │       │   ├── gl.go         # GL function pointer loading
 │       │   ├── renderer.go   # Shader-based quad renderer
+│       │   ├── font.go       # Glyph atlas building + texture cache
 │       │   └── wgl.go        # WGL context creation
 │       └── vulkan/           # Disabled (needs WSI surface bindings)
 
 ├── widget/
 │   ├── widget.go             # Widget interface + BaseWidget
-│   ├── button.go             # Button with hover/press/click
-│   ├── label.go              # Static label
+│   ├── button.go             # Button with hover/press/click, Font field
+│   ├── label.go              # Static label, Font field
 │   └── layout.go             # VBox/HBox layout
 
+├── docs/                     # GitHub Pages site (index, fonts, api, ...)
 └── examples/
     └── counter/              # Interactive counter demo</pre>
 
@@ -76,9 +79,21 @@ functions at runtime. No C compiler, no GPU SDK, no external DLLs to ship.</p>
 <h3>Renderer backends</h3>
 <p>The <code>Renderer</code> interface abstracts GPU rendering:</p>
 <ul>
-<li><code>Init</code>, <code>Draw</code>, <code>Shutdown</code></li>
+<li><code>Init</code> (with window width/height), <code>Draw</code>, <code>Shutdown</code>, <code>SetSize</code></li>
 <li>Backends self-register via <code>init()</code> functions</li>
 <li><code>RegisterBackend</code> / <code>NewBackend</code> / <code>ListBackends</code></li>
+</ul>
+
+<h3>Text rendering</h3>
+<p>Glyphs are rasterized into alpha-mask atlases and uploaded to the GPU once,
+then drawn through the same textured-quad pipeline as solid rectangles:</p>
+<ul>
+<li>The built-in 7x13 bitmap font needs no setup</li>
+<li>Custom TTF/OTF fonts are parsed with <code>sfnt</code> and rasterized with
+<code>opentype</code> at any size</li>
+<li>Each unique font+size pair gets its own cached atlas</li>
+<li>The fragment shader samples the atlas <code>.r</code> channel as alpha so
+glyphs composite over any color</li>
 </ul>
 
 <h3>Widget tree</h3>
